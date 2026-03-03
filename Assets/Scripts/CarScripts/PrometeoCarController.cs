@@ -7,7 +7,6 @@ using UnityEngine.UI;
 
 public class PrometeoCarController2 : MonoBehaviour, CarInputs.ICarInputsMapActions
 {
-    // --- (pozosta³e pola bez zmian) ---
     [Space(20)]
     [Space(10)]
     [Range(20, 190)]
@@ -30,6 +29,17 @@ public class PrometeoCarController2 : MonoBehaviour, CarInputs.ICarInputsMapActi
     public int handbrakeDriftMultiplier = 5;
     [Space(10)]
     public Vector3 bodyMassCenter;
+
+    public enum DriveType
+    {
+        FWD,
+        RWD,
+        AWD
+    }
+
+    [Space(20)]
+    [Header("Drive Settings")]
+    public DriveType driveType = DriveType.AWD;
 
     public GameObject frontLeftMesh;
     public WheelCollider frontLeftCollider;
@@ -232,56 +242,7 @@ public class PrometeoCarController2 : MonoBehaviour, CarInputs.ICarInputsMapActi
         localVelocityX = transform.InverseTransformDirection(carRigidbody.linearVelocity).x;
         localVelocityZ = transform.InverseTransformDirection(carRigidbody.linearVelocity).z;
 
-        // INPUT HANDLING: priority touch -> new Input System -> legacy
-        if (useTouchControls && touchControlsSetup)
-        {
-            // (unchanged) original touch code
-            if (throttlePTI.buttonPressed)
-            {
-                CancelInvoke("DecelerateCar");
-                deceleratingCar = false;
-                GoForward();
-            }
-            if (reversePTI.buttonPressed)
-            {
-                CancelInvoke("DecelerateCar");
-                deceleratingCar = false;
-                GoReverse();
-            }
-
-            if (turnLeftPTI.buttonPressed)
-            {
-                TurnLeft();
-            }
-            if (turnRightPTI.buttonPressed)
-            {
-                TurnRight();
-            }
-            if (handbrakePTI.buttonPressed)
-            {
-                CancelInvoke("DecelerateCar");
-                deceleratingCar = false;
-                Handbrake();
-            }
-            if (!handbrakePTI.buttonPressed)
-            {
-                RecoverTraction();
-            }
-            if ((!throttlePTI.buttonPressed && !reversePTI.buttonPressed))
-            {
-                ThrottleOff();
-            }
-            if ((!reversePTI.buttonPressed && !throttlePTI.buttonPressed) && !handbrakePTI.buttonPressed && !deceleratingCar)
-            {
-                InvokeRepeating("DecelerateCar", 0f, 0.1f);
-                deceleratingCar = true;
-            }
-            if (!turnLeftPTI.buttonPressed && !turnRightPTI.buttonPressed && steeringAxis != 0f)
-            {
-                ResetSteeringAngle();
-            }
-        }
-        else if (carInputs != null) // New Input System branch
+        if (carInputs != null) // New Input System branch
         {
             // Throttle / Reverse priority (separate actions)
             if (throttleInput > 0.1f)
@@ -332,9 +293,14 @@ public class PrometeoCarController2 : MonoBehaviour, CarInputs.ICarInputsMapActi
                 RecoverTraction();
             }
         }
+        else
+        {
+            Debug.Log("No inputs detect");
+            return;
+        }
 
-        // wheel mesh animation
-        AnimateWheelMeshes();
+            // wheel mesh animation
+            AnimateWheelMeshes();
     }
 
     public void CarSounds()
@@ -481,14 +447,31 @@ public class PrometeoCarController2 : MonoBehaviour, CarInputs.ICarInputsMapActi
         {
             if (Mathf.RoundToInt(carSpeed) < maxSpeed)
             {
-                frontLeftCollider.brakeTorque = 0;
-                frontLeftCollider.motorTorque = (accelerationMultiplier * 50f) * throttleAxis;
-                frontRightCollider.brakeTorque = 0;
-                frontRightCollider.motorTorque = (accelerationMultiplier * 50f) * throttleAxis;
-                rearLeftCollider.brakeTorque = 0;
-                rearLeftCollider.motorTorque = (accelerationMultiplier * 50f) * throttleAxis;
-                rearRightCollider.brakeTorque = 0;
-                rearRightCollider.motorTorque = (accelerationMultiplier * 50f) * throttleAxis;
+                float torque = (accelerationMultiplier * 50f) * throttleAxis;
+
+                switch (driveType)
+                {
+                    case DriveType.FWD:
+                        frontLeftCollider.motorTorque = torque;
+                        frontRightCollider.motorTorque = torque;
+                        rearLeftCollider.motorTorque = 0;
+                        rearRightCollider.motorTorque = 0;
+                        break;
+
+                    case DriveType.RWD:
+                        frontLeftCollider.motorTorque = 0;
+                        frontRightCollider.motorTorque = 0;
+                        rearLeftCollider.motorTorque = torque;
+                        rearRightCollider.motorTorque = torque;
+                        break;
+
+                    case DriveType.AWD:
+                        frontLeftCollider.motorTorque = torque;
+                        frontRightCollider.motorTorque = torque;
+                        rearLeftCollider.motorTorque = torque;
+                        rearRightCollider.motorTorque = torque;
+                        break;
+                }
             }
             else
             {
@@ -525,14 +508,31 @@ public class PrometeoCarController2 : MonoBehaviour, CarInputs.ICarInputsMapActi
         {
             if (Mathf.Abs(Mathf.RoundToInt(carSpeed)) < maxReverseSpeed)
             {
-                frontLeftCollider.brakeTorque = 0;
-                frontLeftCollider.motorTorque = (accelerationMultiplier * 50f) * throttleAxis;
-                frontRightCollider.brakeTorque = 0;
-                frontRightCollider.motorTorque = (accelerationMultiplier * 50f) * throttleAxis;
-                rearLeftCollider.brakeTorque = 0;
-                rearLeftCollider.motorTorque = (accelerationMultiplier * 50f) * throttleAxis;
-                rearRightCollider.brakeTorque = 0;
-                rearRightCollider.motorTorque = (accelerationMultiplier * 50f) * throttleAxis;
+                float torque = (accelerationMultiplier * 50f) * throttleAxis;
+
+                switch (driveType)
+                {
+                    case DriveType.FWD:
+                        frontLeftCollider.motorTorque = torque;
+                        frontRightCollider.motorTorque = torque;
+                        rearLeftCollider.motorTorque = 0;
+                        rearRightCollider.motorTorque = 0;
+                        break;
+
+                    case DriveType.RWD:
+                        frontLeftCollider.motorTorque = 0;
+                        frontRightCollider.motorTorque = 0;
+                        rearLeftCollider.motorTorque = torque;
+                        rearRightCollider.motorTorque = torque;
+                        break;
+
+                    case DriveType.AWD:
+                        frontLeftCollider.motorTorque = torque;
+                        frontRightCollider.motorTorque = torque;
+                        rearLeftCollider.motorTorque = torque;
+                        rearRightCollider.motorTorque = torque;
+                        break;
+                }
             }
             else
             {
