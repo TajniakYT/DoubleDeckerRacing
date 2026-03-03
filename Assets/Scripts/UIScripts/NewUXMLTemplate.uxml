@@ -1,0 +1,8 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Art/styleUI.uss?fileID=7433441132597879392&amp;guid=222a00d4671c42242ad29eb1a2213146&amp;type=3#styleUI"/>
+    <ui:VisualElement name="Root" style="flex-grow: 1;">
+        <ui:Label text="Speed" name="SpeedLabel" style="font-size: 40px;"/>
+        <ui:Label text="Gear" name="GearLabel" style="font-size: 40px;"/>
+        <ui:Label text="RPM" name="RPMLabel" style="font-size: 40px;"/>
+    </ui:VisualElement>
+</ui:UXML>
