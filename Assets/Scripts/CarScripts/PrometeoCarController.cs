@@ -448,7 +448,7 @@ public class PrometeoCarController2 : MonoBehaviour, CarInputs.ICarInputsMapActi
             if (Mathf.RoundToInt(carSpeed) < maxSpeed)
             {
                 float torque = (accelerationMultiplier * 50f) * throttleAxis;
-
+                Debug.Log("Should go forward");
                 switch (driveType)
                 {
                     case DriveType.FWD:
@@ -509,7 +509,8 @@ public class PrometeoCarController2 : MonoBehaviour, CarInputs.ICarInputsMapActi
             if (Mathf.Abs(Mathf.RoundToInt(carSpeed)) < maxReverseSpeed)
             {
                 float torque = (accelerationMultiplier * 50f) * throttleAxis;
-
+                Debug.Log("Should reverse");
+                Debug.Log(torque);
                 switch (driveType)
                 {
                     case DriveType.FWD:
@@ -747,7 +748,7 @@ public class PrometeoCarController2 : MonoBehaviour, CarInputs.ICarInputsMapActi
 
     public float ReturnCurrentSpeed()
     {
-        return carRigidbody.linearVelocity.magnitude;
+        return carSpeed;
     }
 
     #region INPUT CALLBACKS (Input System)
